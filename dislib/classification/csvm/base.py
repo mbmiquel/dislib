@@ -117,7 +117,7 @@ class CascadeSVM(object):
         except AttributeError:
             self._kernel_f = getattr(self, "_rbf_kernel")
 
-    def fit(self, dataset):
+    def fit(self, dds):
         """ Fits a model using training data.
 
         Parameters
@@ -129,7 +129,7 @@ class CascadeSVM(object):
         self._set_gamma(dataset.n_features)
 
         while not self._check_finished():
-            self._do_iteration(dataset)
+            self._do_iteration(dds)
 
             if self._check_convergence:
                 self._check_convergence_and_update_w()
@@ -209,30 +209,33 @@ class CascadeSVM(object):
         if self._verbose:
             print("Iteration %s of %s." % (self.iterations, self._max_iter))
 
-    def _do_iteration(self, dataset):
-        q = []
+    def _do_iteration(self, dds):
         arity = self._arity
         params = self._clf_params
+        feedback = self._feedback
 
-        # first level
-        for subset in dataset:
-            data = filter(None, [subset, self._feedback])
-            q.append(_train(False, self._random_state, *data, **params)[0])
+        def _new_train(*args):
+            merged = _new_merge(*args)
+            clf = SVC(random_state=1, **params)
+            clf.fit(X=merged.vectors, y=merged.labels)
+            sup_vec = merged[clf.support_]
+            return sup_vec
 
-        # reduction
-        while len(q) > arity:
-            data = q[:arity]
-            del q[:arity]
+        def _new_merge(*args):
+            d0 = args[0]
+            if len(args) > 1:
+                for dx in args[1:]:
+                    d0.concatenate(dx, remove_duplicates=True)
 
-            q.append(_train(False, self._random_state, *data, **params)[0])
+            return d0
 
-            # delete partial results
-            for partial in data:
-                compss_delete_object(partial)
+        # Extend or Concat?!
+        reduction = dds.map_partitions(lambda x: x.extend(feedback))\
+            .reduce(_new_train, arity=arity)
 
         # last layer
         get_clf = (self._check_convergence or self._is_last_iteration())
-        _out = _train(get_clf, self._random_state, *q, **params)
+        _out = _train(get_clf, self._random_state, *reduction, **params)
         self._feedback, self._clf = _out
         self.iterations += 1
 
