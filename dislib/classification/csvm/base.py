@@ -216,8 +216,8 @@ class CascadeSVM(object):
 
         def _new_train(*args):
             merged = _new_merge(*args)
-            clf = SVC(random_state=1, **params)
-            clf.fit(X=merged.vectors, y=merged.labels)
+            clf = SVC(random_state=self._random_state, **params)
+            clf.fit(X=merged.samples, y=merged.labels)
             sup_vec = merged[clf.support_]
             return sup_vec
 
@@ -226,16 +226,19 @@ class CascadeSVM(object):
             if len(args) > 1:
                 for dx in args[1:]:
                     d0.concatenate(dx, remove_duplicates=True)
-
             return d0
 
-        # Extend or Concat?!
-        reduction = dds.map_partitions(lambda x: x.extend(feedback))\
-            .reduce(_new_train, arity=arity)
+        def append_fb(partition):
+            if feedback:
+                partition.append(feedback)
+            return partition
+
+        mapped = dds.map_partitions(append_fb)
+        reduction = mapped.reduce(_new_train, arity=arity)
 
         # last layer
         get_clf = (self._check_convergence or self._is_last_iteration())
-        _out = _train(get_clf, self._random_state, *reduction, **params)
+        _out = _train(get_clf, self._random_state, reduction, **params)
         self._feedback, self._clf = _out
         self.iterations += 1
 
