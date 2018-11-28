@@ -215,18 +215,11 @@ class CascadeSVM(object):
         feedback = self._feedback
 
         def _new_train(*args):
-            merged = _new_merge(*args)
+            merged = _merge(*args)
             clf = SVC(random_state=self._random_state, **params)
             clf.fit(X=merged.samples, y=merged.labels)
             sup_vec = merged[clf.support_]
             return sup_vec
-
-        def _new_merge(*args):
-            d0 = args[0]
-            if len(args) > 1:
-                for dx in args[1:]:
-                    d0.concatenate(dx, remove_duplicates=True)
-            return d0
 
         def append_fb(partition):
             if feedback:
