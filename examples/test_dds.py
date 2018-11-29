@@ -11,7 +11,8 @@ def main():
     file_path = sys.argv[1]
     print("Hola!")
 
-    csvm=CascadeSVM(gamma=0.001, c=10000, max_iter=2000, check_convergence=True, verbose=True)
+    csvm=CascadeSVM(gamma=0.001, c=10000, max_iter=2000, check_convergence=True,
+                    verbose=True)
 
     def lines_to_dataset(lines, n_features, store_sparse=True):
         from tempfile import SpooledTemporaryFile
