@@ -76,11 +76,11 @@ class NearestNeighbors:
         final_indices = _merge_arrays(*indices)
         final_distances = _merge_arrays(*distances)
 
-        final_indices = compss_wait_on(final_indices)
+        # final_indices = compss_wait_on(final_indices)
         query = final_indices
 
         if return_distance:
-            final_distances = compss_wait_on(final_distances)
+            # final_distances = compss_wait_on(final_distances)
             query = final_distances, final_indices
 
         return query
