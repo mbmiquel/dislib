@@ -73,8 +73,7 @@ class NearestNeighbors:
             distances.append(dist)
             indices.append(ind)
 
-        # final_indices = _merge_arrays(*indices)
-        final_indices = None
+        final_indices = _merge_arrays(*indices)
         final_distances = _merge_arrays(*distances)
 
         # final_indices = compss_wait_on(final_indices)
