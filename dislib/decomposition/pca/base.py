@@ -2,7 +2,7 @@ from copy import copy
 
 import numpy as np
 from pycompss.api.api import compss_wait_on
-from pycompss.api.parameter import COLLECTION_IN, Depth, Type, COLLECTION_INOUT
+from pycompss.api.parameter import COLLECTION_IN, Depth, Type, COLLECTION_OUT
 from pycompss.api.task import task
 from sklearn.base import BaseEstimator
 from sklearn.utils import validation
@@ -171,7 +171,7 @@ def _finalize_features_mean(feature_sums, n_samples):
 
 
 @task(blocks={Type: COLLECTION_IN, Depth: 2},
-      out_blocks={Type: COLLECTION_INOUT, Depth: 1})
+      out_blocks={Type: COLLECTION_OUT, Depth: 1})
 def _normalize(blocks, out_blocks, means):
     data = Array._merge_blocks(blocks)
     data = np.array(data - means)
@@ -247,7 +247,7 @@ def _transform(x, mean, components):
 
 
 @task(blocks={Type: COLLECTION_IN, Depth: 2},
-      out_blocks={Type: COLLECTION_INOUT, Depth: 1})
+      out_blocks={Type: COLLECTION_OUT, Depth: 1})
 def _subset_transform(blocks, out_blocks, mean, components):
     data = Array._merge_blocks(blocks)
     bn, bm = blocks[0][0].shape

@@ -4,7 +4,7 @@ from math import ceil
 
 import numpy as np
 from pycompss.api.api import compss_wait_on
-from pycompss.api.parameter import Type, COLLECTION_IN, Depth, COLLECTION_INOUT
+from pycompss.api.parameter import Type, COLLECTION_IN, Depth, COLLECTION_OUT
 from pycompss.api.task import task
 from scipy import sparse as sp
 from scipy.sparse import issparse, csr_matrix
@@ -161,7 +161,7 @@ class Array(object):
     def _get_out_blocks(n_blocks):
         """
         Helper function that builds empty lists of lists to be filled as
-        parameter of type COLLECTION_INOUT
+        parameter of type COLLECTION_OUT
         """
         return [[object() for _ in range(n_blocks[1])]
                 for _ in range(n_blocks[0])]
@@ -914,7 +914,7 @@ def load_txt_file(path, block_size, delimiter=","):
                  shape=(n_lines, n_cols), sparse=False)
 
 
-@task(out_blocks=COLLECTION_INOUT, returns=1)
+@task(out_blocks=COLLECTION_OUT, returns=1)
 def _read_lines(lines, block_size, delimiter, out_blocks):
     samples = np.genfromtxt(lines, delimiter=delimiter)
 
@@ -922,7 +922,7 @@ def _read_lines(lines, block_size, delimiter, out_blocks):
         out_blocks[i] = samples[:, j:j + block_size]
 
 
-@task(out_blocks={Type: COLLECTION_INOUT, Depth: 2})
+@task(out_blocks={Type: COLLECTION_OUT, Depth: 2})
 def _read_svmlight(lines, out_blocks, col_size, n_features, store_sparse):
     from tempfile import SpooledTemporaryFile
     from sklearn.datasets import load_svmlight_file
@@ -975,7 +975,7 @@ def _filter_cols(blocks, cols):
 
 
 @task(blocks={Type: COLLECTION_IN, Depth: 2},
-      out_blocks={Type: COLLECTION_INOUT, Depth: 1})
+      out_blocks={Type: COLLECTION_OUT, Depth: 1})
 def _merge_rows(blocks, out_blocks, blocks_shape, skip):
     """
     Merges the blocks into a single list of blocks where each block has bn
@@ -989,7 +989,7 @@ def _merge_rows(blocks, out_blocks, blocks_shape, skip):
 
 
 @task(blocks={Type: COLLECTION_IN, Depth: 2},
-      out_blocks={Type: COLLECTION_INOUT, Depth: 1})
+      out_blocks={Type: COLLECTION_OUT, Depth: 1})
 def _merge_cols(blocks, out_blocks, blocks_shape, skip):
     """
     Merges the blocks into a single list of blocks where each block has bn
@@ -1017,7 +1017,7 @@ def _filter_block(block, boundaries):
 
 
 @task(blocks={Type: COLLECTION_IN, Depth: 2},
-      out_blocks={Type: COLLECTION_INOUT, Depth: 2})
+      out_blocks={Type: COLLECTION_OUT, Depth: 2})
 def _transpose(blocks, out_blocks):
     for i in range(len(blocks)):
         for j in range(len(blocks[i])):
