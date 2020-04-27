@@ -18,8 +18,8 @@ env:
 
 before_script:
     - source launch_cassandra.sh
-    - docker build --tag emebemb/dislib_hecuba_compss_production:0.2 .
-    - docker run -it --network cassandra_bridge -d --name dislib emebemb/dislib_hecuba_compss_production:0.2
+    - docker build --tag emebemb/dislib_hecuba_compss_production:0.3 .
+    - docker run -it --network cassandra_bridge -d --name dislib emebemb/dislib_hecuba_compss_production:0.3
 
 
 script: "docker exec -e CONTACT_NAMES='cassandra_container' -e NODE_PORT=9042 dislib /dislib/run_tests.sh"
