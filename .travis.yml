@@ -1,4 +1,4 @@
-language: python
+language: python3.6
 install: skip
 
 sudo: required
@@ -22,7 +22,7 @@ before_script:
     - docker run -it --network cassandra_bridge -d --name dislib emebemb/dislib_hecuba_compss_production:0.2
 
 
-script: "docker exec -e CONTACT_NAMES='cassandra_container' -e NODE_PORT=9042  dislib /dislib/run_tests.sh"
+script: "docker exec -e CONTACT_NAMES='cassandra_container' -e NODE_PORT=9042 dislib /dislib/run_tests.sh"
 
 #after_script:
 #  - docker images
